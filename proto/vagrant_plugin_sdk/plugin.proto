@@ -1337,6 +1337,7 @@ message Project {
 service VagrantfileService {
   rpc GetValue(Vagrantfile.ValueRequest) returns (Args.Direct);
   rpc GetConfig(Vagrantfile.NamespaceRequest) returns (Args.ConfigData);
+  rpc SetConfig(Vagrantfile.SetConfigRequest) returns (google.protobuf.Empty);
   rpc Target(Vagrantfile.TargetRequest) returns (Args.Target);
   rpc TargetConfig(Vagrantfile.TargetConfigRequest) returns (Args.Vagrantfile);
   rpc TargetNames(google.protobuf.Empty) returns (Vagrantfile.TargetNamesResponse);
@@ -1347,6 +1348,12 @@ service VagrantfileService {
  * Vagrantfile message used with Vagrantfile service
  *******************************************************/
 message Vagrantfile {
+  message SetConfigRequest {
+    NamespaceRequest namespace = 1;
+    string data_key = 2;
+    Args.ConfigData data_value = 3;
+  }
+
   message ValueRequest {
     repeated string path = 1;
   }

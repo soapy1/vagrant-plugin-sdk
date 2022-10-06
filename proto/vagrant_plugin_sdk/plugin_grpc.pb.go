@@ -8595,6 +8595,7 @@ var ProjectService_ServiceDesc = grpc.ServiceDesc{
 type VagrantfileServiceClient interface {
 	GetValue(ctx context.Context, in *Vagrantfile_ValueRequest, opts ...grpc.CallOption) (*Args_Direct, error)
 	GetConfig(ctx context.Context, in *Vagrantfile_NamespaceRequest, opts ...grpc.CallOption) (*Args_ConfigData, error)
+	SetConfig(ctx context.Context, in *Vagrantfile_SetConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Target(ctx context.Context, in *Vagrantfile_TargetRequest, opts ...grpc.CallOption) (*Args_Target, error)
 	TargetConfig(ctx context.Context, in *Vagrantfile_TargetConfigRequest, opts ...grpc.CallOption) (*Args_Vagrantfile, error)
 	TargetNames(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Vagrantfile_TargetNamesResponse, error)
@@ -8621,6 +8622,15 @@ func (c *vagrantfileServiceClient) GetValue(ctx context.Context, in *Vagrantfile
 func (c *vagrantfileServiceClient) GetConfig(ctx context.Context, in *Vagrantfile_NamespaceRequest, opts ...grpc.CallOption) (*Args_ConfigData, error) {
 	out := new(Args_ConfigData)
 	err := c.cc.Invoke(ctx, "/hashicorp.vagrant.sdk.VagrantfileService/GetConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *vagrantfileServiceClient) SetConfig(ctx context.Context, in *Vagrantfile_SetConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/hashicorp.vagrant.sdk.VagrantfileService/SetConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -8669,6 +8679,7 @@ func (c *vagrantfileServiceClient) PrimaryTargetName(ctx context.Context, in *em
 type VagrantfileServiceServer interface {
 	GetValue(context.Context, *Vagrantfile_ValueRequest) (*Args_Direct, error)
 	GetConfig(context.Context, *Vagrantfile_NamespaceRequest) (*Args_ConfigData, error)
+	SetConfig(context.Context, *Vagrantfile_SetConfigRequest) (*emptypb.Empty, error)
 	Target(context.Context, *Vagrantfile_TargetRequest) (*Args_Target, error)
 	TargetConfig(context.Context, *Vagrantfile_TargetConfigRequest) (*Args_Vagrantfile, error)
 	TargetNames(context.Context, *emptypb.Empty) (*Vagrantfile_TargetNamesResponse, error)
@@ -8684,6 +8695,9 @@ func (UnimplementedVagrantfileServiceServer) GetValue(context.Context, *Vagrantf
 }
 func (UnimplementedVagrantfileServiceServer) GetConfig(context.Context, *Vagrantfile_NamespaceRequest) (*Args_ConfigData, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfig not implemented")
+}
+func (UnimplementedVagrantfileServiceServer) SetConfig(context.Context, *Vagrantfile_SetConfigRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetConfig not implemented")
 }
 func (UnimplementedVagrantfileServiceServer) Target(context.Context, *Vagrantfile_TargetRequest) (*Args_Target, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Target not implemented")
@@ -8741,6 +8755,24 @@ func _VagrantfileService_GetConfig_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(VagrantfileServiceServer).GetConfig(ctx, req.(*Vagrantfile_NamespaceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _VagrantfileService_SetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Vagrantfile_SetConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VagrantfileServiceServer).SetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hashicorp.vagrant.sdk.VagrantfileService/SetConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VagrantfileServiceServer).SetConfig(ctx, req.(*Vagrantfile_SetConfigRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -8831,6 +8863,10 @@ var VagrantfileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConfig",
 			Handler:    _VagrantfileService_GetConfig_Handler,
+		},
+		{
+			MethodName: "SetConfig",
+			Handler:    _VagrantfileService_SetConfig_Handler,
 		},
 		{
 			MethodName: "Target",
