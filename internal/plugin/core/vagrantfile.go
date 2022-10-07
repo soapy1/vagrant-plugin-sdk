@@ -155,6 +155,22 @@ func (v *vagrantfileClient) GetValue(path ...string) (interface{}, error) {
 	return raw.(*component.Direct).Arguments[0], nil
 }
 
+func (v *vagrantfileClient) SetConfig(namespace string, config *component.ConfigData) error {
+	configData, err := v.Map(config, (**vagrant_plugin_sdk.Args_ConfigData)(nil), argmapper.Typed(v.Ctx))
+	if err != nil {
+		return err
+	}
+	_, err = v.client.SetConfig(v.Ctx,
+		&vagrant_plugin_sdk.Vagrantfile_SetConfigRequest{
+			Namespace: &vagrant_plugin_sdk.Vagrantfile_NamespaceRequest{
+				Namespace: namespace,
+			},
+			DataValue: configData.(*vagrant_plugin_sdk.Args_ConfigData),
+		},
+	)
+	return err
+}
+
 // Server
 
 func (v *vagrantfileServer) Target(
@@ -300,8 +316,32 @@ func (v *vagrantfileServer) GetValue(
 	return raw.(*vagrant_plugin_sdk.Args_Direct), nil
 }
 
+func (v *vagrantfileServer) SetConfig(
+	ctx context.Context,
+	req *vagrant_plugin_sdk.Vagrantfile_SetConfigRequest,
+) (*emptypb.Empty, error) {
+	rawData, err := v.Map(
+		req.DataValue,
+		(**component.ConfigData)(nil),
+		argmapper.Typed(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	err = v.Impl.SetConfig(req.Namespace.Namespace, rawData.(*component.ConfigData))
+	if err != nil {
+		v.Logger.Error("failed to set config from implementation",
+			"namespace", req.Namespace,
+			"error", err,
+		)
+		return nil, err
+	}
+	return &emptypb.Empty{}, nil
+}
+
 var (
-	_ plugin.Plugin     = (*VagrantfilePlugin)(nil)
-	_ plugin.GRPCPlugin = (*VagrantfilePlugin)(nil)
-	_ core.Vagrantfile  = (*vagrantfileClient)(nil)
+	_ plugin.Plugin                               = (*VagrantfilePlugin)(nil)
+	_ plugin.GRPCPlugin                           = (*VagrantfilePlugin)(nil)
+	_ core.Vagrantfile                            = (*vagrantfileClient)(nil)
+	_ vagrant_plugin_sdk.VagrantfileServiceServer = (*vagrantfileServer)(nil)
 )
