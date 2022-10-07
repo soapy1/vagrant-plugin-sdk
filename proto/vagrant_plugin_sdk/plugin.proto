@@ -1350,8 +1350,7 @@ service VagrantfileService {
 message Vagrantfile {
   message SetConfigRequest {
     NamespaceRequest namespace = 1;
-    string data_key = 2;
-    Args.ConfigData data_value = 3;
+    Args.ConfigData data_value = 2;
   }
 
   message ValueRequest {
