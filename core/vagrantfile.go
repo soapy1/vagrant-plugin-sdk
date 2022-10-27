@@ -5,6 +5,7 @@ import (
 )
 
 type Vagrantfile interface {
+	GetRootConfig() (*component.ConfigData, error)
 	GetConfig(namespace string) (*component.ConfigData, error)
 	GetValue(path ...string) (interface{}, error)
 	PrimaryTargetName() (name string, err error)

@@ -121,6 +121,19 @@ func (v *vagrantfileClient) PrimaryTargetName() (string, error) {
 	return resp.Name, nil
 }
 
+func (v *vagrantfileClient) GetRootConfig() (*component.ConfigData, error) {
+	resp, err := v.client.GetRootConfig(v.Ctx, &emptypb.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	raw, err := v.Map(resp, (**component.ConfigData)(nil), argmapper.Typed(v.Ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	return raw.(*component.ConfigData), nil
+}
+
 func (v *vagrantfileClient) GetConfig(namespace string) (*component.ConfigData, error) {
 	resp, err := v.client.GetConfig(v.Ctx,
 		&vagrant_plugin_sdk.Vagrantfile_NamespaceRequest{
@@ -248,6 +261,27 @@ func (v *vagrantfileServer) PrimaryTargetName(
 	return &vagrant_plugin_sdk.Vagrantfile_PrimaryTargetNameResponse{
 		Name: n,
 	}, nil
+}
+
+func (v *vagrantfileServer) GetRootConfig(
+	ctx context.Context,
+	req *emptypb.Empty,
+) (*vagrant_plugin_sdk.Args_ConfigData, error) {
+	c, err := v.Impl.GetRootConfig()
+	if err != nil {
+		v.Logger.Error("failed to get root config from implementation",
+			"error", err,
+		)
+		return nil, err
+	}
+	raw, err := v.Map(c, (**vagrant_plugin_sdk.Args_ConfigData)(nil), argmapper.Typed(ctx))
+	if err != nil {
+		v.Logger.Error("failed to map config data",
+			"error", err,
+		)
+		return nil, err
+	}
+	return raw.(*vagrant_plugin_sdk.Args_ConfigData), nil
 }
 
 func (v *vagrantfileServer) GetConfig(
