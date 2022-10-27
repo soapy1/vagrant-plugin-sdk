@@ -1335,6 +1335,7 @@ message Project {
 * Vagrantfile services
 ********************************************************************/
 service VagrantfileService {
+  rpc GetRootConfig(google.protobuf.Empty) returns (Args.ConfigData);
   rpc GetValue(Vagrantfile.ValueRequest) returns (Args.Direct);
   rpc GetConfig(Vagrantfile.NamespaceRequest) returns (Args.ConfigData);
   rpc SetConfig(Vagrantfile.SetConfigRequest) returns (google.protobuf.Empty);
